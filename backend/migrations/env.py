@@ -8,6 +8,7 @@ from app.db.base import Base
 
 from app.movies import models as movie_models  # noqa: F401
 from app.users import models as user_models  # noqa: F401
+from app.tracking import models as tracking_models  # noqa: F401
 
 config = context.config
 
