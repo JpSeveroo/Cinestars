@@ -85,7 +85,8 @@ class MovieRepository:
         )
         self.db.add(db_movie)
         await self.db.flush()
-        return db_movie
+        reloaded = await self.get_by_id(db_movie.sk_movie_id)
+        return reloaded or db_movie
 
     async def update(self, db_movie: DimMovie, movie_in: MovieUpdate) -> DimMovie:
         update_data = movie_in.model_dump(exclude_unset=True)
