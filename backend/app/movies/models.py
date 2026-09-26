@@ -125,6 +125,14 @@ class DimMovie(Base):
     reviews: Mapped[list["MovieReview"]] = relationship(
         back_populates="movie", cascade="all, delete-orphan", order_by="MovieReview.created_at"
     )
+    
+    @property
+    def nota_media(self) -> float | None:
+        return self.reviews_summary.nota_media_usuarios if self.reviews_summary else None
+
+    @property
+    def qtd_avaliacoes(self) -> int:
+        return self.reviews_summary.qtd_avaliacoes_usuarios if self.reviews_summary else 0
 
 
 class DimGenre(Base):

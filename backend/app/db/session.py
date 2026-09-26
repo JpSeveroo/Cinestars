@@ -30,7 +30,12 @@ AsyncSessionLocal = async_sessionmaker(bind=engine, expire_on_commit=False, auto
 
 
 async def get_db() -> AsyncIterator[AsyncSession]:
-    """Fornece uma sessão assíncrona por requisição."""
+    """Fornece uma sessão assíncrona por requisição com commit e rollback transacional."""
 
     async with AsyncSessionLocal() as session:
-        yield session
+        try:
+            yield session
+            await session.commit()
+        except Exception:
+            await session.rollback()
+            raise

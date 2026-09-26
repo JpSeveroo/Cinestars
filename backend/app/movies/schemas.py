@@ -1,5 +1,7 @@
 from datetime import date, datetime
 from pydantic import BaseModel, ConfigDict, Field
+import math
+from pydantic import BaseModel, computed_field
 
 """
     Basicamente aqui a gente trata o oque a api vai exibir de cada entidade, 
@@ -99,4 +101,7 @@ class PaginatedMoviesResponse(BaseModel):
     total: int
     page: int
     page_size: int
-    total_pages: int
+
+    @computed_field
+    def total_pages(self) -> int:
+        return math.ceil(self.total / self.page_size) if self.total > 0 else 0
