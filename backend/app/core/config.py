@@ -15,6 +15,9 @@ class Settings(BaseSettings):
     database_url: str = "sqlite+aiosqlite:///./rocketlab.db"
     backend_cors_origins: list[str] = ["http://localhost:5173"]
     log_level: str = "INFO"
+    secret_key: str = "vou-preencher-depois"
+    algorithm: str = "HS256" # Pra o nosso proposito eh melhor
+    access_token_expire_minutes: int = 60 * 24
 
 
 @lru_cache
