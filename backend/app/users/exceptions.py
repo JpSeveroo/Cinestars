@@ -11,3 +11,6 @@ class InvalidCredentialsError(Exception):
 class UserNotFoundError(Exception):
     """Lançada quando um ID ou token não encontra usuário correspondente."""
     pass
+
+class UserNotFoundError(Exception):
+    pass

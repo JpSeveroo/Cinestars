@@ -1,6 +1,6 @@
 from sqlalchemy.exc import IntegrityError
 from app.core.security import create_access_token, get_password_hash, verify_password
-from app.users.exceptions import InvalidCredentialsError, UserAlreadyExistsError
+from app.users.exceptions import InvalidCredentialsError, UserAlreadyExistsError, UserNotFoundError
 from app.users.models import User
 from app.users.repository import UserRepository
 from app.users.schemas import TokenResponse, UserCreate, UserLogin
@@ -29,3 +29,23 @@ class AuthService:
 
         token = create_access_token(subject=user.id)
         return TokenResponse(access_token=token)
+
+    async def get_public_profile(self, nickname: str) -> dict:
+        user = await self.repository.get_by_nickname(nickname)
+        if not user:
+            raise UserNotFoundError(f"Cinéfilo com nickname '{nickname}' não foi encontrado.")
+
+        stats = await self.repository.get_user_stats(user.id)
+        favorites = await self.repository.get_top_favorites(user.id, limit=4)
+        recent_reviews = await self.repository.get_recent_reviews(user.id, limit=5)
+
+        return {
+            "id": user.id,
+            "nickname": user.nickname,
+            "bio": user.bio,
+            "avatar_url": user.avatar_url,
+            "created_at": user.created_at,
+            "stats": stats,
+            "favorites": favorites,
+            "recent_reviews": recent_reviews,
+        }

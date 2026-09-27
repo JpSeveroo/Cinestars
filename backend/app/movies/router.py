@@ -6,8 +6,6 @@ from app.movies.schemas import (
     MovieSummaryResponse,
     MovieUpdate,
     PaginatedMoviesResponse,
-    ReviewCreate,
-    ReviewResponse,
 )
 from app.movies.service import MovieService, get_movie_service
 
@@ -75,16 +73,3 @@ async def delete_movie(
     service: MovieService = Depends(get_movie_service),
 ) -> None:
     await service.delete_movie(movie_id)
-
-
-@router.post(
-    "/{movie_id}/reviews",
-    response_model=ReviewResponse,
-    status_code=status.HTTP_201_CREATED,
-)
-async def create_movie_review(
-    movie_id: str,
-    review_in: ReviewCreate,
-    service: MovieService = Depends(get_movie_service),
-) -> ReviewResponse:
-    return await service.add_review(movie_id, review_in)

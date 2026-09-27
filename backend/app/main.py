@@ -10,6 +10,7 @@ from app.core.config import get_settings
 from app.core.logging import configure_logging
 from app.db.session import engine
 from app.movies.exceptions import MovieNotFoundError
+from app.reviews.service import ReviewNotFoundError
 
 configure_logging()
 settings = get_settings()
@@ -37,8 +38,10 @@ def create_app() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
     @app.exception_handler(MovieNotFoundError)
-    async def movie_not_found_handler(_request: Request, exc: MovieNotFoundError) -> JSONResponse:
+    @app.exception_handler(ReviewNotFoundError)
+    async def not_found_handler(_request: Request, exc: Exception) -> JSONResponse:
         return JSONResponse(
             status_code=status.HTTP_404_NOT_FOUND,
             content={"detail": str(exc)},

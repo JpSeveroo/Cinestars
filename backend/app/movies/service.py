@@ -2,23 +2,17 @@ from collections.abc import Sequence
 
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.db.session import get_db
 
+from app.db.session import get_db
 from app.movies.exceptions import MovieNotFoundError
-from app.movies.models import DimMovie, MovieReview
-from app.movies.repository import MovieRepository, ReviewRepository
-from app.movies.schemas import MovieCreate, MovieUpdate, ReviewCreate
+from app.movies.models import DimMovie
+from app.movies.repository import MovieRepository
+from app.movies.schemas import MovieCreate, MovieUpdate
 
 
 class MovieService:
-
-    def __init__(
-        self,
-        movie_repo: MovieRepository,
-        review_repo: ReviewRepository,
-    ) -> None:
+    def __init__(self, movie_repo: MovieRepository) -> None:
         self.movie_repo = movie_repo
-        self.review_repo = review_repo
 
     async def list_movies(
         self,
@@ -52,17 +46,6 @@ class MovieService:
         movie = await self.get_movie_by_id(movie_id)
         await self.movie_repo.delete(movie)
 
-    async def add_review(
-        self, movie_id: str, review_in: ReviewCreate
-    ) -> MovieReview:
-        movie = await self.get_movie_by_id(movie_id)
-        return await self.review_repo.create_and_sync_metrics(
-            movie_sk_id=movie.sk_movie_id,
-            review_in=review_in,
-        )
 
 def get_movie_service(db: AsyncSession = Depends(get_db)) -> MovieService:
-    return MovieService(
-        movie_repo=MovieRepository(db),
-        review_repo=ReviewRepository(db),
-    )
+    return MovieService(movie_repo=MovieRepository(db))
