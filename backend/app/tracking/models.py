@@ -2,9 +2,10 @@ import enum
 import uuid
 from datetime import datetime, timezone
 from sqlalchemy import Boolean, DateTime, Enum, ForeignKey, String, UniqueConstraint
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
+from app.movies.models import DimMovie
 
 
 class MovieWatchStatus(str, enum.Enum):
@@ -50,6 +51,8 @@ class UserMovieTracking(Base):
         onupdate=lambda: datetime.now(timezone.utc),
         nullable=False,
     )
+
+    movie: Mapped[DimMovie] = relationship(lazy="selectin")
 
     __table_args__ = (
         UniqueConstraint("user_id", "movie_id", name="uq_user_movie_tracking"),

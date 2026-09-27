@@ -46,6 +46,10 @@ class MovieReviewListResponse(BaseModel):
     per_page: int
     average_community_rating: float | None
 
+    @computed_field
+    def total_pages(self) -> int:
+        return math.ceil(self.total / self.per_page) if self.total > 0 else 0
+
 class FeedMovieCard(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 

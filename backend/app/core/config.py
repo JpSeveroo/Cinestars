@@ -15,7 +15,7 @@ class Settings(BaseSettings):
     database_url: str = "sqlite+aiosqlite:///./rocketlab.db"
     backend_cors_origins: list[str] = ["http://localhost:5173"]
     log_level: str = "INFO"
-    secret_key: str = "vou-preencher-depois"
+    secret_key: str = "cinestars-dev-secret-key-must-be-at-least-32-bytes-long"
     algorithm: str = "HS256" # Pra o nosso proposito eh melhor
     access_token_expire_minutes: int = 60 * 24
 

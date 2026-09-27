@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import get_db
@@ -44,12 +44,3 @@ async def get_my_movie_status(
     service: TrackingService = Depends(get_tracking_service),
 ) -> UserMovieTracking | None:
     return await service.get_my_status(current_user.id, movie_id)
-
-
-@router.delete("/{movie_id}/status", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_movie_tracking(
-    movie_id: str,
-    current_user: User = Depends(get_current_user),
-    service: TrackingService = Depends(get_tracking_service),
-) -> None:
-    await service.remove_tracking(current_user.id, movie_id)

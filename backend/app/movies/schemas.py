@@ -1,5 +1,5 @@
 import math
-from datetime import date, datetime
+from datetime import date
 
 from pydantic import BaseModel, ConfigDict, Field, computed_field
 
@@ -15,16 +15,6 @@ class PersonResponse(BaseModel):
     sk_person_id: str
     nome_pessoa: str
     tipo_pessoa: str
-
-
-class ReviewResponse(BaseModel):
-    """Schema para visualização das reviews históricas do dataset."""
-    model_config = ConfigDict(from_attributes=True)
-    sk_movie_review_id: str
-    nome: str
-    nota: float
-    comentario: str
-    created_at: datetime
 
 
 class MovieBase(BaseModel):

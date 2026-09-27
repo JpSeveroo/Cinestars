@@ -36,7 +36,7 @@ class MovieRepository:
                 .replace("%", r"\%")
                 .replace("_", r"\_")
             )
-            search_filter = DimMovie.titulo.ilike(f"%{escaped_search}%")
+            search_filter = DimMovie.titulo.ilike(f"%{escaped_search}%", escape="\\")
             count_stmt = count_stmt.where(search_filter)
             stmt = stmt.where(search_filter)
 

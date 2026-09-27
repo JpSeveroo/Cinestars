@@ -1,15 +1,13 @@
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, Depends, Query
 
 from app.movies.schemas import (
-    MovieCreate,
     MovieDetailResponse,
-    MovieSummaryResponse,
-    MovieUpdate,
     PaginatedMoviesResponse,
 )
 from app.movies.service import MovieService, get_movie_service
 
 router = APIRouter(prefix="/movies", tags=["movies"])
+
 
 @router.get("", response_model=PaginatedMoviesResponse)
 async def list_movies(
@@ -31,17 +29,6 @@ async def list_movies(
     )
 
 
-@router.post(
-    "",
-    response_model=MovieSummaryResponse,
-    status_code=status.HTTP_201_CREATED,
-)
-async def create_movie(
-    movie_in: MovieCreate,
-    service: MovieService = Depends(get_movie_service),
-) -> MovieSummaryResponse:
-    return await service.create_movie(movie_in)
-
 @router.get(
     "/{movie_id}",
     response_model=MovieDetailResponse,
@@ -51,25 +38,3 @@ async def get_movie(
     service: MovieService = Depends(get_movie_service),
 ) -> MovieDetailResponse:
     return await service.get_movie_by_id(movie_id)
-
-
-@router.patch(
-    "/{movie_id}",
-    response_model=MovieSummaryResponse,
-)
-async def update_movie(
-    movie_id: str,
-    movie_in: MovieUpdate,
-    service: MovieService = Depends(get_movie_service),
-) -> MovieSummaryResponse:
-    return await service.update_movie(movie_id, movie_in)
-
-@router.delete(
-    "/{movie_id}",
-    status_code=status.HTTP_204_NO_CONTENT,
-)
-async def delete_movie(
-    movie_id: str,
-    service: MovieService = Depends(get_movie_service),
-) -> None:
-    await service.delete_movie(movie_id)

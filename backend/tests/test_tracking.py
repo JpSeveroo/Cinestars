@@ -46,6 +46,7 @@ async def test_filter_library(
     )
     assert res_found.status_code == 200
     assert len(res_found.json()) == 1
+    assert res_found.json()[0]["movie"]["titulo"] == sample_movie.titulo
 
     # Filtro que NÃO deve encontrar o filme
     res_empty = await client.get(

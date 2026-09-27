@@ -58,7 +58,7 @@ class TrackingRepository:
             tracking.updated_at = datetime.now(timezone.utc)
 
         await self.db.flush()
-        return tracking
+        return await self.get_by_user_and_movie(user_id, movie_id)
 
     async def delete(self, user_id: str, movie_id: str) -> bool:
         tracking = await self.get_by_user_and_movie(user_id, movie_id)
