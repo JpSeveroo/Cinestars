@@ -1,5 +1,8 @@
+import math
 from datetime import datetime
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+
+from pydantic import BaseModel, ConfigDict, Field, computed_field, field_validator
+
 
 
 class ReviewAuthorResponse(BaseModel):
@@ -42,3 +45,35 @@ class MovieReviewListResponse(BaseModel):
     page: int
     per_page: int
     average_community_rating: float | None
+
+class FeedMovieCard(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    sk_movie_id: str
+    id_filme: str
+    titulo: str
+    ano_lancamento: int | None
+    url_poster: str | None
+
+
+class FeedItemResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: str
+    rating: float
+    review_text: str | None
+    has_spoilers: bool
+    created_at: datetime
+    user: ReviewAuthorResponse
+    movie: FeedMovieCard
+
+
+class PaginatedFeedResponse(BaseModel):
+    items: list[FeedItemResponse]
+    total: int
+    page: int
+    per_page: int
+
+    @computed_field
+    def total_pages(self) -> int:
+        return math.ceil(self.total / self.per_page) if self.total > 0 else 0

@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -43,6 +44,25 @@ class ReviewRepository:
 
         formatted_avg = round(float(avg_rating), 2) if avg_rating is not None else None
         return items, total or 0, formatted_avg
+
+    async def list_feed(
+        self, page: int = 1, per_page: int = 20
+    ) -> tuple[list[UserReview], int]:
+        offset = (page - 1) * per_page
+
+        count_stmt = select(func.count(UserReview.id))
+        total = (await self.db.execute(count_stmt)).scalar_one()
+
+        stmt = (
+            select(UserReview)
+            .order_by(UserReview.created_at.desc())
+            .offset(offset)
+            .limit(per_page)
+        )
+        result = await self.db.execute(stmt)
+        items = list(result.scalars().all())
+
+        return items, total or 0
 
     async def upsert(
         self,

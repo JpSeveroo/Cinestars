@@ -3,7 +3,11 @@ from app.movies.models import DimMovie
 from app.movies.repository import MovieRepository
 from app.reviews.models import UserReview
 from app.reviews.repository import ReviewRepository
-from app.reviews.schemas import MovieReviewListResponse, ReviewCreate
+from app.reviews.schemas import (
+    MovieReviewListResponse,
+    PaginatedFeedResponse,
+    ReviewCreate,
+)
 from app.tracking.models import MovieWatchStatus
 from app.tracking.repository import TrackingRepository
 
@@ -34,7 +38,7 @@ class ReviewService:
     ) -> UserReview:
         movie = await self._get_movie_or_fail(movie_id)
 
-        # Atualiza no tracking passando o dicionário exatamente como seu repositório espera
+        # Regra Letterboxd: Ao avaliar, marca o filme automaticamente como ASSISTIDO
         await self.tracking_repository.upsert(
             user_id=user_id,
             movie_id=movie.sk_movie_id,
@@ -62,6 +66,17 @@ class ReviewService:
             page=page,
             per_page=per_page,
             average_community_rating=avg_rating,
+        )
+
+    async def get_feed(
+        self, page: int = 1, per_page: int = 20
+    ) -> PaginatedFeedResponse:
+        items, total = await self.repository.list_feed(page=page, per_page=per_page)
+        return PaginatedFeedResponse(
+            items=items,
+            total=total,
+            page=page,
+            per_page=per_page,
         )
 
     async def get_my_review(

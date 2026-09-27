@@ -1,10 +1,12 @@
 import uuid
 from datetime import datetime, timezone
+
 from sqlalchemy import Boolean, DateTime, Float, ForeignKey, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
-from app.users.models import User 
+from app.movies.models import DimMovie
+from app.users.models import User
 
 
 class UserReview(Base):
@@ -44,6 +46,7 @@ class UserReview(Base):
         DateTime(timezone=True),
         default=lambda: datetime.now(timezone.utc),
         nullable=False,
+        index=True,  # Otimização para a ordenação do feed social
     )
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
@@ -53,6 +56,7 @@ class UserReview(Base):
     )
 
     user: Mapped[User] = relationship(lazy="selectin")
+    movie: Mapped[DimMovie] = relationship(lazy="selectin")
 
     __table_args__ = (
         UniqueConstraint("user_id", "movie_id", name="uq_user_movie_review"),
