@@ -8,13 +8,10 @@ import {
   Star,
   ArrowRight,
   MessageSquare,
-  Eye,
-  EyeOff,
   ChevronDown,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/Button";
-import { Badge } from "@/components/ui/Badge";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { MovieCard } from "@/components/shared/MovieCard";
 import { StarRating } from "@/components/shared/StarRating";
@@ -27,7 +24,6 @@ import type { PaginatedFeedResponse, FeedItemResponse } from "@/types/review";
 export const HomePage: React.FC = () => {
   const { isAuthenticated, user } = useAuthStore();
   const [feedPage, setFeedPage] = useState(1);
-  const [revealedSpoilers, setRevealedSpoilers] = useState<Record<string, boolean>>({});
 
   // 1. Filmes em Destaque (6 primeiros filmes com pôster)
   const { data: featuredData, isLoading: isLoadingFeatured } = useQuery<
@@ -50,27 +46,12 @@ export const HomePage: React.FC = () => {
   } = useQuery<PaginatedFeedResponse>({
     queryKey: ["reviews", "feed", feedPage],
     queryFn: async () => {
-      try {
-        const response = await api.get<PaginatedFeedResponse>("/feed", {
-          params: { page: feedPage, per_page: 8 },
-        });
-        return response.data;
-      } catch {
-        // Fallback para rota secundária se existir
-        const fallback = await api.get<PaginatedFeedResponse>("/reviews/community/feed", {
-          params: { page: feedPage, per_page: 8 },
-        });
-        return fallback.data;
-      }
+      const response = await api.get<PaginatedFeedResponse>("/reviews/community/feed", {
+        params: { page: feedPage, per_page: 8 },
+      });
+      return response.data;
     },
   });
-
-  const toggleSpoiler = (reviewId: string) => {
-    setRevealedSpoilers((prev) => ({
-      ...prev,
-      [reviewId]: !prev[reviewId],
-    }));
-  };
 
   const featuredMovies = featuredData?.items || [];
   const feedItems = feedData?.items || [];
@@ -178,7 +159,7 @@ export const HomePage: React.FC = () => {
         )}
       </section>
 
-      {/* 3. Timeline da Comunidade (Feed Global Letterboxd) */}
+      {/* 3. Timeline da Comunidade (Feed Global CineStars) */}
       <section className="space-y-4">
         <div className="flex items-center justify-between border-b border-line pb-3">
           <div className="space-y-0.5">
@@ -204,9 +185,6 @@ export const HomePage: React.FC = () => {
         ) : feedItems.length > 0 ? (
           <div className="space-y-4">
             {feedItems.map((item: FeedItemResponse) => {
-              const isSpoiled = item.has_spoilers;
-              const isRevealed = Boolean(revealedSpoilers[item.id]);
-
               return (
                 <article
                   key={item.id}
@@ -247,14 +225,9 @@ export const HomePage: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* Nota e Badge de Spoiler */}
+                    {/* Nota */}
                     <div className="flex items-center gap-2 self-start sm:self-center">
                       <StarRating rating={item.rating} scale={5} size="sm" showValue />
-                      {isSpoiled && (
-                        <Badge variant="spoiler" size="sm">
-                          Spoiler
-                        </Badge>
-                      )}
                     </div>
                   </div>
 
@@ -292,39 +265,9 @@ export const HomePage: React.FC = () => {
                       </Link>
 
                       {item.review_text && (
-                        <div>
-                          {isSpoiled && !isRevealed ? (
-                            <div className="p-2.5 rounded-[8px] bg-bg2 border border-line/60 flex items-center justify-between text-xs">
-                              <span className="text-muted italic">
-                                Esta resenha contém detalhes da trama ocultados por spoiler.
-                              </span>
-                              <button
-                                type="button"
-                                onClick={() => toggleSpoiler(item.id)}
-                                className="text-gold hover:text-gold/80 flex items-center gap-1 font-medium ml-2"
-                              >
-                                <Eye className="w-3.5 h-3.5" />
-                                <span>Revelar</span>
-                              </button>
-                            </div>
-                          ) : (
-                            <div>
-                              <p className="text-text-body text-[0.88rem] leading-relaxed whitespace-pre-line">
-                                {item.review_text}
-                              </p>
-                              {isSpoiled && isRevealed && (
-                                <button
-                                  type="button"
-                                  onClick={() => toggleSpoiler(item.id)}
-                                  className="text-[0.72rem] text-muted hover:text-text flex items-center gap-1 mt-1.5 transition-colors"
-                                >
-                                  <EyeOff className="w-3 h-3" />
-                                  <span>Ocultar novamente</span>
-                                </button>
-                              )}
-                            </div>
-                          )}
-                        </div>
+                        <p className="text-text-body text-[0.88rem] leading-relaxed whitespace-pre-line">
+                          {item.review_text}
+                        </p>
                       )}
                     </div>
                   </div>

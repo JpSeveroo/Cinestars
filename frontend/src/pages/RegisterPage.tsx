@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import axios from "axios";
 import { toast } from "sonner";
-import { UserPlus, User, Mail, Lock, Eye, EyeOff, Image, FileText, AlertCircle } from "lucide-react";
+import { UserPlus, User, Mail, Lock, Eye, EyeOff, AlertCircle } from "lucide-react";
 
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -34,15 +34,6 @@ const registerSchema = z
     confirmPassword: z
       .string()
       .min(1, "Confirme sua senha."),
-    avatar_url: z
-      .string()
-      .url("A URL do avatar deve ser um link válido.")
-      .optional()
-      .or(z.literal("")),
-    bio: z
-      .string()
-      .max(500, "A biografia pode ter no máximo 500 caracteres.")
-      .optional(),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "As senhas não coincidem.",
@@ -76,21 +67,17 @@ export const RegisterPage: React.FC = () => {
       email: "",
       password: "",
       confirmPassword: "",
-      avatar_url: "",
-      bio: "",
     },
   });
 
   const onSubmit = async (data: RegisterFormData) => {
     setApiError(null);
     try {
-      // 1. Cadastra o novo usuário cinéfilo na API
+      // 1. Cadastra o novo usuário cinéfilo na API apenas com dados essenciais
       await api.post<UserType>("/auth/register", {
         nickname: data.nickname.trim(),
         email: data.email.trim(),
         password: data.password,
-        avatar_url: data.avatar_url?.trim() || null,
-        bio: data.bio?.trim() || null,
       });
 
       // 2. Realiza o login automático imediatamente para experiência contínua
@@ -211,45 +198,6 @@ export const RegisterPage: React.FC = () => {
             error={errors.confirmPassword?.message}
             {...register("confirmPassword")}
           />
-
-          <Input
-            id="avatar_url"
-            label="URL do Avatar (Opcional)"
-            placeholder="https://exemplo.com/sua-foto.jpg"
-            hint="Link público de imagem"
-            disabled={isSubmitting}
-            leftIcon={<Image className="w-4 h-4" />}
-            error={errors.avatar_url?.message}
-            {...register("avatar_url")}
-          />
-
-          <div className="w-full flex flex-col gap-1.5 text-left">
-            <label
-              htmlFor="bio"
-              className="text-[0.82rem] font-medium text-muted flex items-center justify-between"
-            >
-              <span>Biografia (Opcional)</span>
-              <span className="text-[0.75rem] text-muted/70">Máx. 500 caracteres</span>
-            </label>
-            <div className="relative flex items-center w-full">
-              <div className="absolute left-3 top-3 text-muted pointer-events-none">
-                <FileText className="w-4 h-4" />
-              </div>
-              <textarea
-                id="bio"
-                rows={2}
-                disabled={isSubmitting}
-                placeholder="Conte um pouco sobre suas preferências cinematográficas..."
-                className="w-full bg-bg2 text-text text-[0.92rem] rounded-[8px] border border-line py-[10px] pl-9 pr-3 transition-colors placeholder:text-muted/60 focus:outline-none focus:ring-2 focus:ring-gold focus:ring-offset-1 focus:ring-offset-bg resize-none"
-                {...register("bio")}
-              />
-            </div>
-            {errors.bio && (
-              <span className="text-[0.78rem] text-danger font-medium">
-                {errors.bio.message}
-              </span>
-            )}
-          </div>
 
           <Button
             type="submit"

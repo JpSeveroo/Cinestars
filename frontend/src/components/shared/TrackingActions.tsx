@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { CheckCircle2, Bookmark, Heart, Star, LogIn } from "lucide-react";
+import { CheckCircle2, Bookmark, PlayCircle, XCircle, Heart, Star, LogIn } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/Button";
@@ -73,7 +73,11 @@ export const TrackingActions: React.FC<TrackingActionsProps> = ({
         toast.success(`"${movieTitle}" marcado como assistido!`);
       } else if (updated.status === WatchStatus.QUERO_ASSISTIR) {
         toast.success(`"${movieTitle}" adicionado à sua lista de interesse!`);
-      } else if (updated.is_favorite) {
+      } else if (updated.status === WatchStatus.ASSISTINDO) {
+        toast.success(`"${movieTitle}" marcado como assistindo!`);
+      } else if (updated.status === WatchStatus.ABANDONEI) {
+        toast.success(`"${movieTitle}" marcado como abandonado.`);
+      } else if (updated.is_favorite && !trackingData?.is_favorite) {
         toast.success(`"${movieTitle}" adicionado aos favoritos!`);
       } else {
         toast.info("Status de acompanhamento atualizado.");
@@ -86,18 +90,13 @@ export const TrackingActions: React.FC<TrackingActionsProps> = ({
 
   const isWatched = trackingData?.status === WatchStatus.ASSISTIDO;
   const isWantToWatch = trackingData?.status === WatchStatus.QUERO_ASSISTIR;
+  const isWatching = trackingData?.status === WatchStatus.ASSISTINDO;
+  const isAbandoned = trackingData?.status === WatchStatus.ABANDONEI;
   const isFavorite = Boolean(trackingData?.is_favorite);
 
-  const handleToggleWatched = () => {
+  const handleToggleStatus = (targetStatus: WatchStatusType) => {
     trackingMutation.mutate({
-      status: isWatched ? null : WatchStatus.ASSISTIDO,
-      is_favorite: isFavorite,
-    });
-  };
-
-  const handleToggleWantToWatch = () => {
-    trackingMutation.mutate({
-      status: isWantToWatch ? null : WatchStatus.QUERO_ASSISTIR,
+      status: trackingData?.status === targetStatus ? null : targetStatus,
       is_favorite: isFavorite,
     });
   };
@@ -130,14 +129,14 @@ export const TrackingActions: React.FC<TrackingActionsProps> = ({
   }
 
   return (
-    <div className={`space-y-3 ${className}`}>
-      {/* Botões de Ação de Tracking Rápido */}
+    <div className={`space-y-2.5 ${className}`}>
+      {/* 4 Status Reais da Obra */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-        {/* Botão Assistido */}
+        {/* Assistido */}
         <button
           type="button"
           disabled={isLoadingTracking || trackingMutation.isPending}
-          onClick={handleToggleWatched}
+          onClick={() => handleToggleStatus(WatchStatus.ASSISTIDO)}
           className={`flex items-center justify-center gap-1.5 p-2.5 rounded-[8px] border text-xs font-semibold transition-all select-none ${
             isWatched
               ? "bg-teal/15 border-teal text-teal shadow-sm"
@@ -145,14 +144,14 @@ export const TrackingActions: React.FC<TrackingActionsProps> = ({
           }`}
         >
           <CheckCircle2 className={`w-4 h-4 ${isWatched ? "stroke-teal" : "stroke-current"}`} />
-          <span>{isWatched ? "Assistido" : "Marcar Assistido"}</span>
+          <span>{isWatched ? "Assistido" : "Assistido"}</span>
         </button>
 
-        {/* Botão Quero Assistir */}
+        {/* Quero Assistir */}
         <button
           type="button"
           disabled={isLoadingTracking || trackingMutation.isPending}
-          onClick={handleToggleWantToWatch}
+          onClick={() => handleToggleStatus(WatchStatus.QUERO_ASSISTIR)}
           className={`flex items-center justify-center gap-1.5 p-2.5 rounded-[8px] border text-xs font-semibold transition-all select-none ${
             isWantToWatch
               ? "bg-gold/15 border-gold text-gold shadow-sm"
@@ -163,6 +162,39 @@ export const TrackingActions: React.FC<TrackingActionsProps> = ({
           <span>{isWantToWatch ? "Na Lista" : "Quero Assistir"}</span>
         </button>
 
+        {/* Assistindo */}
+        <button
+          type="button"
+          disabled={isLoadingTracking || trackingMutation.isPending}
+          onClick={() => handleToggleStatus(WatchStatus.ASSISTINDO)}
+          className={`flex items-center justify-center gap-1.5 p-2.5 rounded-[8px] border text-xs font-semibold transition-all select-none ${
+            isWatching
+              ? "bg-sky-500/15 border-sky-400 text-sky-400 shadow-sm"
+              : "bg-card border-line text-muted hover:text-text hover:border-muted hover:bg-[#252a3a]"
+          }`}
+        >
+          <PlayCircle className={`w-4 h-4 ${isWatching ? "stroke-sky-400" : "stroke-current"}`} />
+          <span>{isWatching ? "Assistindo" : "Assistindo"}</span>
+        </button>
+
+        {/* Abandonei */}
+        <button
+          type="button"
+          disabled={isLoadingTracking || trackingMutation.isPending}
+          onClick={() => handleToggleStatus(WatchStatus.ABANDONEI)}
+          className={`flex items-center justify-center gap-1.5 p-2.5 rounded-[8px] border text-xs font-semibold transition-all select-none ${
+            isAbandoned
+              ? "bg-orange-500/15 border-orange-400 text-orange-400 shadow-sm"
+              : "bg-card border-line text-muted hover:text-text hover:border-muted hover:bg-[#252a3a]"
+          }`}
+        >
+          <XCircle className={`w-4 h-4 ${isAbandoned ? "stroke-orange-400" : "stroke-current"}`} />
+          <span>{isAbandoned ? "Abandonado" : "Abandonei"}</span>
+        </button>
+      </div>
+
+      {/* Ações Complementares: Favorito e Avaliar */}
+      <div className="grid grid-cols-2 gap-2">
         {/* Botão Favorito */}
         <button
           type="button"

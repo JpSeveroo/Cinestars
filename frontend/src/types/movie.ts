@@ -28,6 +28,7 @@ export interface MovieDetail extends MovieCardItem {
   sinopse: string | null;
   url_backdrop?: string | null;
   people?: Person[];
+  generos?: string[];
 }
 
 export interface MovieFilterParams {

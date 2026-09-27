@@ -48,7 +48,7 @@ export const Footer: React.FC = () => {
           <div className="flex items-center gap-2">
             <span>Desenvolvido com React, TypeScript & FastAPI</span>
             <span className="text-line">•</span>
-            <span className="text-gold/80">Letterboxd Style</span>
+            <span className="text-gold/80">CineStars</span>
           </div>
         </div>
       </div>

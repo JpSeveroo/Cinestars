@@ -162,7 +162,7 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
             </label>
           </div>
 
-          {/* Aviso da Regra Letterboxd Auto-Watched */}
+          {/* Aviso da Regra CineStars Auto-Watched */}
           <div className="p-3 rounded-[8px] bg-gold/10 border border-gold/20 flex items-start gap-2.5 text-xs text-text-body">
             <CheckCircle2 className="w-4 h-4 text-gold flex-shrink-0 mt-0.5" />
             <p>

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import {
   Film,
   ArrowLeft,
@@ -12,6 +13,7 @@ import {
   MessageSquare,
   ChevronLeft,
   ChevronRight,
+  Trash2,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/Button";
@@ -21,12 +23,15 @@ import { StarRating } from "@/components/shared/StarRating";
 import { TrackingActions } from "@/components/shared/TrackingActions";
 import { api } from "@/lib/api";
 import { queryKeys } from "@/lib/queryKeys";
+import { useAuthStore } from "@/store/authStore";
 import type { MovieDetail } from "@/types/movie";
 import type { MovieReviewListResponse, ReviewItem } from "@/types/review";
 
 export const MovieDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const movieId = id || "";
+  const queryClient = useQueryClient();
+  const { user: currentUser } = useAuthStore();
   const [reviewsPage, setReviewsPage] = useState(1);
   const [revealedSpoilers, setRevealedSpoilers] = useState<Record<string, boolean>>({});
 
@@ -39,10 +44,42 @@ export const MovieDetailPage: React.FC = () => {
     queryKey: queryKeys.movies.detail(movieId),
     queryFn: async () => {
       const response = await api.get<MovieDetail>(`/movies/${movieId}`);
-      return response.data;
+      const data = response.data;
+      if (!data.generos && (data as any).genres) {
+        data.generos = (data as any).genres.map((g: any) =>
+          typeof g === "object" && g !== null && "nome_genero" in g ? g.nome_genero : String(g)
+        );
+      }
+      return data;
     },
     enabled: Boolean(movieId),
   });
+
+  // Mutação para excluir avaliação do próprio usuário
+  const deleteReviewMutation = useMutation({
+    mutationFn: async (reviewId: string) => {
+      await api.delete(`/reviews/${reviewId}`, {
+        params: { movie_id: movieId },
+      });
+    },
+    onSuccess: () => {
+      toast.success("Avaliação excluída com sucesso!");
+      queryClient.invalidateQueries({ queryKey: ["reviews", "movie", movieId] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.movies.detail(movieId) });
+      queryClient.invalidateQueries({ queryKey: ["reviews", "feed"] });
+      queryClient.invalidateQueries({ queryKey: ["reviews", "movie", movieId, "me"] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.tracking.byMovie(movieId) });
+    },
+    onError: () => {
+      toast.error("Erro ao excluir avaliação.");
+    },
+  });
+
+  const handleDeleteReview = (reviewId: string) => {
+    if (window.confirm("Tem certeza que deseja excluir sua avaliação?")) {
+      deleteReviewMutation.mutate(reviewId);
+    }
+  };
 
   // 2. Consulta das avaliações da comunidade
   const {
@@ -198,11 +235,11 @@ export const MovieDetailPage: React.FC = () => {
           </div>
 
           {/* Gêneros */}
-          {movie.genres && movie.genres.length > 0 && (
+          {movie.generos && movie.generos.length > 0 && (
             <div className="flex flex-wrap items-center gap-1.5 pt-1">
-              {movie.genres.map((g) => (
-                <Badge key={g.sk_genre_id} variant="genre" size="sm">
-                  {g.nome_genero}
+              {movie.generos.map((genero, index) => (
+                <Badge key={`${genero}-${index}`} variant="genre" size="sm">
+                  {genero}
                 </Badge>
               ))}
             </div>
@@ -342,6 +379,18 @@ export const MovieDetailPage: React.FC = () => {
                         <Badge variant="spoiler" size="sm">
                           Spoiler
                         </Badge>
+                      )}
+                      {currentUser && review.user.id === currentUser.id && (
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteReview(review.id)}
+                          disabled={deleteReviewMutation.isPending}
+                          className="p-1.5 rounded-[6px] text-muted hover:text-danger hover:bg-danger/10 transition-colors ml-1"
+                          title="Excluir avaliação"
+                          aria-label="Excluir avaliação"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
                       )}
                     </div>
                   </div>

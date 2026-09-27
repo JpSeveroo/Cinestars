@@ -36,7 +36,7 @@ export interface FeedItemResponse {
   id: string;
   rating: number;
   review_text: string | null;
-  has_spoilers: boolean;
+  has_spoilers?: boolean;
   created_at: string;
   user: ReviewAuthor;
   movie: FeedMovieCard;
