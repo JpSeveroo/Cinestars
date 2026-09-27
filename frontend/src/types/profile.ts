@@ -24,6 +24,7 @@ export interface ProfileStats {
   total_dropped: number;
   total_reviews: number;
   average_user_rating: number | null;
+  media_pessoal?: number | null;
   total_favorites?: number;
 }
 
@@ -35,5 +36,6 @@ export interface PublicUserProfile {
   created_at: string;
   stats: ProfileStats;
   favorites: (ProfileMovieCard | MovieCardItem)[];
+  favorite_movies?: (ProfileMovieCard | MovieCardItem)[];
   recent_reviews: ProfileRecentReview[];
 }

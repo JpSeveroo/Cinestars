@@ -77,12 +77,14 @@ class ProfileRecentReview(BaseModel):
 
 
 class ProfileStats(BaseModel):
-    total_watched: int
-    total_watchlist: int
-    total_watching: int
-    total_dropped: int
-    total_reviews: int
+    total_watched: int = 0
+    total_watchlist: int = 0
+    total_watching: int = 0
+    total_dropped: int = 0
+    total_favorites: int = 0
+    total_reviews: int = 0
     average_user_rating: float | None = None
+    media_pessoal: float | None = None
 
 
 class UserProfileResponse(BaseModel):
@@ -90,9 +92,10 @@ class UserProfileResponse(BaseModel):
 
     id: str
     nickname: str
-    bio: str | None
-    avatar_url: str | None
+    bio: str | None = None
+    avatar_url: str | None = None
     created_at: datetime
     stats: ProfileStats
-    favorites: list[ProfileMovieCard]
-    recent_reviews: list[ProfileRecentReview]
+    favorites: list[ProfileMovieCard] = []
+    favorite_movies: list[ProfileMovieCard] = []
+    recent_reviews: list[ProfileRecentReview] = []

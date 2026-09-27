@@ -68,6 +68,8 @@ export const TrackingActions: React.FC<TrackingActionsProps> = ({
       queryClient.setQueryData(queryKeys.tracking.byMovie(movieId), updated);
       queryClient.invalidateQueries({ queryKey: queryKeys.tracking.byMovie(movieId) });
       queryClient.invalidateQueries({ queryKey: ["tracking", "library"] });
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.movies.detail(movieId) });
 
       if (updated.status === WatchStatus.ASSISTIDO) {
         toast.success(`"${movieTitle}" marcado como assistido!`);

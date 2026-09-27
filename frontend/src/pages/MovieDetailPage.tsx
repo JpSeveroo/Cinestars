@@ -69,6 +69,7 @@ export const MovieDetailPage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ["reviews", "feed"] });
       queryClient.invalidateQueries({ queryKey: ["reviews", "movie", movieId, "me"] });
       queryClient.invalidateQueries({ queryKey: queryKeys.tracking.byMovie(movieId) });
+      queryClient.invalidateQueries({ queryKey: ["users"] });
     },
     onError: () => {
       toast.error("Erro ao excluir avaliação.");

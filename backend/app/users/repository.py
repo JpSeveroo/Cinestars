@@ -24,13 +24,15 @@ class UserRepository:
         return result.scalar_one_or_none()
 
     async def get_by_nickname(self, nickname: str) -> User | None:
-        result = await self.db.execute(select(User).where(User.nickname == nickname))
+        stmt = select(User).where(func.lower(User.nickname) == nickname.strip().lower())
+        result = await self.db.execute(stmt)
         return result.scalar_one_or_none()
 
     async def get_by_login(self, identifier: str) -> User | None:
-        """Busca o usuário por email OU nickname (login flexível)."""
+        """Busca o usuário por email OU nickname (login flexível e case-insensitive)."""
+        clean_id = identifier.strip().lower()
         stmt = select(User).where(
-            or_(User.email == identifier, User.nickname == identifier)
+            or_(func.lower(User.email) == clean_id, func.lower(User.nickname) == clean_id)
         )
         result = await self.db.execute(stmt)
         return result.scalar_one_or_none()
@@ -82,10 +84,11 @@ class UserRepository:
             func.count(case((UserMovieTracking.status == MovieWatchStatus.QUERO_ASSISTIR, 1))).label("watchlist"),
             func.count(case((UserMovieTracking.status == MovieWatchStatus.ASSISTINDO, 1))).label("watching"),
             func.count(case((UserMovieTracking.status == MovieWatchStatus.ABANDONEI, 1))).label("dropped"),
+            func.count(case((UserMovieTracking.is_favorite.is_(True), 1))).label("favorites"),
         ).where(UserMovieTracking.user_id == user_id)
 
         tracking_res = await self.db.execute(tracking_stmt)
-        watched, watchlist, watching, dropped = tracking_res.one()
+        watched, watchlist, watching, dropped, favorites = tracking_res.one()
 
         # 2. Total de reviews e nota média atribuída pelo usuário em uma só query
         reviews_stmt = select(
@@ -95,14 +98,17 @@ class UserRepository:
 
         reviews_res = await self.db.execute(reviews_stmt)
         total_reviews, avg_rating = reviews_res.one()
+        formatted_avg = round(float(avg_rating), 2) if avg_rating is not None else None
 
         return {
             "total_watched": watched or 0,
             "total_watchlist": watchlist or 0,
             "total_watching": watching or 0,
             "total_dropped": dropped or 0,
+            "total_favorites": favorites or 0,
             "total_reviews": total_reviews or 0,
-            "average_user_rating": round(float(avg_rating), 2) if avg_rating is not None else None,
+            "average_user_rating": formatted_avg,
+            "media_pessoal": formatted_avg,
         }
 
     async def get_top_favorites(self, user_id: str, limit: int = 4) -> list[DimMovie]:

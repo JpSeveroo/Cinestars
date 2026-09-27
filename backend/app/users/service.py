@@ -54,5 +54,6 @@ class AuthService:
             "created_at": user.created_at,
             "stats": stats,
             "favorites": favorites,
+            "favorite_movies": favorites,
             "recent_reviews": recent_reviews,
         }

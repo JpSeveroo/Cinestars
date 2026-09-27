@@ -90,8 +90,8 @@ export const ProfilePage: React.FC = () => {
   if (!profile) return null;
 
   const stats = profile.stats;
-  const favorites = (profile.favorites || []) as (ProfileMovieCard | MovieCardItem)[];
-  const recentReviews = (profile.recent_reviews || []) as ProfileRecentReview[];
+  const favorites = ((profile.favorites || profile.favorite_movies || []) as (ProfileMovieCard | MovieCardItem)[]).slice(0, 4);
+  const recentReviews = ((profile.recent_reviews || []) as ProfileRecentReview[]).slice(0, 5);
 
   const formattedDate = profile.created_at
     ? new Date(profile.created_at).toLocaleDateString("pt-BR", {
@@ -343,8 +343,8 @@ export const ProfilePage: React.FC = () => {
           </div>
         ) : (
           <div className="p-8 rounded-[10px] bg-card border border-line text-center space-y-2">
-            <p className="text-sm font-semibold text-text">Nenhuma resenha publicada</p>
-            <p className="text-xs text-muted">Este cinéfilo ainda não publicou avaliações com texto.</p>
+            <p className="text-sm font-semibold text-text">Nenhuma avaliação publicada ainda</p>
+            <p className="text-xs text-muted">Este cinéfilo ainda não publicou avaliações no CineStars.</p>
           </div>
         )}
       </section>

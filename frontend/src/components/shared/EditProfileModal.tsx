@@ -30,7 +30,6 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
   const [imageError, setImageError] = useState<boolean>(false);
 
   const queryClient = useQueryClient();
-  const { updateUser } = useAuthStore();
 
   useEffect(() => {
     if (isOpen) {
@@ -67,7 +66,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
     },
     onSuccess: (updatedUser) => {
       // 1. Atualiza a store global do Zustand
-      updateUser({
+      useAuthStore.getState().updateUser({
         bio: updatedUser.bio,
         avatar_url: updatedUser.avatar_url,
       });

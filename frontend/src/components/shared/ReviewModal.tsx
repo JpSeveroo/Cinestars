@@ -69,6 +69,7 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
       queryClient.invalidateQueries({ queryKey: ["tracking", "library"] });
       queryClient.invalidateQueries({ queryKey: queryKeys.movies.detail(movieId) });
       queryClient.invalidateQueries({ queryKey: ["reviews", "feed"] });
+      queryClient.invalidateQueries({ queryKey: ["users"] });
       onClose();
     },
     onError: (err: any) => {
