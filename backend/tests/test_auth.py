@@ -68,3 +68,15 @@ async def test_get_current_user_me(client: AsyncClient, auth_headers: dict):
     response = await client.get("/api/v1/auth/me", headers=auth_headers)
     assert response.status_code == 200
     assert response.json()["nickname"] == "cinefilo_tester"
+
+
+@pytest.mark.asyncio
+async def test_register_avatar_url_max_length_validation(client: AsyncClient):
+    payload = {
+        "email": "avatar_overflow@example.com",
+        "nickname": "overflow_user",
+        "password": "senha_segura_123",
+        "avatar_url": "https://example.com/" + "a" * 500,
+    }
+    response = await client.post("/api/v1/auth/register", json=payload)
+    assert response.status_code == 422

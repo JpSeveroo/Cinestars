@@ -10,7 +10,7 @@ class UserCreate(BaseModel):
     email: EmailStr
     nickname: str = Field(..., min_length=3, max_length=50, pattern=r"^[a-zA-Z0-9_-]+$")
     password: str = Field(..., min_length=6, max_length=72, description="Limite estrito de 72 bytes do bcrypt")
-    avatar_url: str | None = None
+    avatar_url: str | None = Field(default=None, max_length=500)
     bio: str | None = Field(default=None, max_length=500)
 
 
