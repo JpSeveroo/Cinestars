@@ -4,7 +4,7 @@ from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import get_db
-from app.movies.exceptions import MovieNotFoundError
+from app.movies.exceptions import MovieNotFoundError, MoviePermissionError
 from app.movies.models import DimMovie
 from app.movies.repository import MovieRepository
 from app.movies.schemas import MovieCreate, MovieUpdate
@@ -35,17 +35,23 @@ class MovieService:
             raise MovieNotFoundError(movie_id)
         return movie
 
-    async def create_movie(self, movie_in: MovieCreate) -> DimMovie:
-        return await self.movie_repo.create(movie_in)
+    async def create_movie(
+        self, movie_in: MovieCreate, created_by_user_id: str | None = None
+    ) -> DimMovie:
+        return await self.movie_repo.create(movie_in, created_by_user_id=created_by_user_id)
 
     async def update_movie(
-        self, movie_id: str, movie_in: MovieUpdate
+        self, movie_id: str, movie_in: MovieUpdate, current_user_id: str
     ) -> DimMovie:
         movie = await self.get_movie_by_id(movie_id)
+        if not movie.created_by_user_id or movie.created_by_user_id != current_user_id:
+            raise MoviePermissionError("Você não tem permissão para editar ou excluir este filme.")
         return await self.movie_repo.update(movie, movie_in)
 
-    async def delete_movie(self, movie_id: str) -> None:
+    async def delete_movie(self, movie_id: str, current_user_id: str) -> None:
         movie = await self.get_movie_by_id(movie_id)
+        if not movie.created_by_user_id or movie.created_by_user_id != current_user_id:
+            raise MoviePermissionError("Você não tem permissão para editar ou excluir este filme.")
         await self.movie_repo.delete(movie)
 
 

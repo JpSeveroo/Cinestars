@@ -74,6 +74,7 @@ class MovieDetailResponse(BaseModel):
     sinopse: str | None
     url_poster: str | None
     url_backdrop: str | None
+    created_by_user_id: str | None = None
     nota_media: float | None = None
     qtd_avaliacoes: int = 0
     genres: list[GenreResponse] = []

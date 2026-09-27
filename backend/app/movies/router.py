@@ -42,7 +42,7 @@ async def create_movie(
     service: MovieService = Depends(get_movie_service),
 ) -> MovieDetailResponse:
     """Cadastra um novo filme no catálogo."""
-    return await service.create_movie(payload)
+    return await service.create_movie(payload, created_by_user_id=current_user.id)
 
 
 @router.get(
@@ -64,7 +64,7 @@ async def update_movie(
     service: MovieService = Depends(get_movie_service),
 ) -> MovieDetailResponse:
     """Atualiza metadados de um filme existente."""
-    return await service.update_movie(movie_id, payload)
+    return await service.update_movie(movie_id, payload, current_user_id=current_user.id)
 
 
 @router.delete("/{movie_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -74,4 +74,4 @@ async def delete_movie(
     service: MovieService = Depends(get_movie_service),
 ) -> None:
     """Remove um filme do catálogo."""
-    await service.delete_movie(movie_id)
+    await service.delete_movie(movie_id, current_user_id=current_user.id)

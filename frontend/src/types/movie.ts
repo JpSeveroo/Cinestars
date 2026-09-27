@@ -30,6 +30,7 @@ export interface MovieDetail extends MovieCardItem {
   people?: Person[];
   generos?: string[];
   diretor?: string | null;
+  created_by_user_id?: string | number | null;
 }
 
 export interface MoviePayload {

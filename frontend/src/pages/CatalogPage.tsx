@@ -133,7 +133,7 @@ export const CatalogPage: React.FC = () => {
                 id="btn-create-movie"
               >
                 <Plus className="w-4 h-4" />
-                <span>+ Cadastrar Filme</span>
+                <span>Cadastrar Filme</span>
               </Button>
             )}
           </div>

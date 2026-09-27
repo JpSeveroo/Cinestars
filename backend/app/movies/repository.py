@@ -82,7 +82,7 @@ class MovieRepository:
         result = await self.db.execute(stmt)
         return result.scalar_one_or_none()
 
-    async def create(self, movie_in: MovieCreate) -> DimMovie:
+    async def create(self, movie_in: MovieCreate, created_by_user_id: str | None = None) -> DimMovie:
         id_filme = movie_in.id_filme
         if not id_filme:
             id_filme = f"movie_{uuid.uuid4().hex[:10]}"
@@ -97,6 +97,7 @@ class MovieRepository:
             sinopse=movie_in.sinopse,
             url_poster=movie_in.url_poster,
             url_backdrop=movie_in.url_backdrop,
+            created_by_user_id=created_by_user_id,
         )
         self.db.add(db_movie)
         await self.db.flush()

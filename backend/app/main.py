@@ -9,7 +9,7 @@ from app.api.v1.router import api_router
 from app.core.config import get_settings
 from app.core.logging import configure_logging
 from app.db.session import engine
-from app.movies.exceptions import MovieNotFoundError
+from app.movies.exceptions import MovieNotFoundError, MoviePermissionError
 from app.reviews.service import ReviewNotFoundError
 
 configure_logging()
@@ -51,6 +51,13 @@ def create_app() -> FastAPI:
     async def not_found_handler(_request: Request, exc: Exception) -> JSONResponse:
         return JSONResponse(
             status_code=status.HTTP_404_NOT_FOUND,
+            content={"detail": str(exc)},
+        )
+
+    @app.exception_handler(MoviePermissionError)
+    async def forbidden_handler(_request: Request, exc: MoviePermissionError) -> JSONResponse:
+        return JSONResponse(
+            status_code=status.HTTP_403_FORBIDDEN,
             content={"detail": str(exc)},
         )
 

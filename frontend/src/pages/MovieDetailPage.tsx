@@ -34,7 +34,7 @@ export const MovieDetailPage: React.FC = () => {
   const movieId = id || "";
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { user: currentUser, isAuthenticated } = useAuthStore();
+  const { user: currentUser } = useAuthStore();
   const [reviewsPage, setReviewsPage] = useState(1);
   const [revealedSpoilers, setRevealedSpoilers] = useState<Record<string, boolean>>({});
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -181,6 +181,7 @@ export const MovieDetailPage: React.FC = () => {
   const totalReviews = reviewsData?.total || 0;
   const directors = movie.people?.filter((p) => p.tipo_pessoa.toLowerCase() === "director") || [];
   const actors = movie.people?.filter((p) => p.tipo_pessoa.toLowerCase() === "actor").slice(0, 5) || [];
+  const isOwner = Boolean(currentUser?.id && movie?.created_by_user_id === currentUser.id);
 
   return (
     <div className="space-y-10">
@@ -194,7 +195,7 @@ export const MovieDetailPage: React.FC = () => {
           <span>Voltar ao Catálogo</span>
         </Link>
 
-        {isAuthenticated && (
+        {isOwner && (
           <div className="flex items-center gap-2">
             <Button
               variant="secondary"
@@ -534,7 +535,7 @@ export const MovieDetailPage: React.FC = () => {
       </section>
 
       {/* Modal de Edição de Filme */}
-      {isAuthenticated && movie && (
+      {isOwner && movie && (
         <MovieFormModal
           isOpen={isEditModalOpen}
           onClose={() => setIsEditModalOpen(false)}

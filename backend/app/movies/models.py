@@ -104,6 +104,13 @@ class DimMovie(Base):
     sinopse: Mapped[str | None] = mapped_column(String(4000), default=None)
     url_poster: Mapped[str | None] = mapped_column(String(2048), default=None)
     url_backdrop: Mapped[str | None] = mapped_column(String(2048), default=None)
+    created_by_user_id: Mapped[str | None] = mapped_column(
+        String(36),
+        ForeignKey("users.id", ondelete="SET NULL"),
+        nullable=True,
+        default=None,
+        index=True,
+    )
 
     genres: Mapped[list["DimGenre"]] = relationship(
         secondary=bridge_movie_genre, back_populates="movies", order_by="DimGenre.nome_genero"
