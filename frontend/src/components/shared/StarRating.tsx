@@ -9,6 +9,7 @@ export interface StarRatingProps {
   interactive?: boolean;
   size?: "sm" | "md" | "lg";
   showValue?: boolean;
+  showOutOfTen?: boolean; // Exibe também a equivalência sobre 10
   onChange?: (newRating: number) => void;
   className?: string;
 }
@@ -20,6 +21,7 @@ export const StarRating: React.FC<StarRatingProps> = ({
   interactive = false,
   size = "md",
   showValue = false,
+  showOutOfTen = false,
   onChange,
   className,
 }) => {
@@ -109,7 +111,13 @@ export const StarRating: React.FC<StarRatingProps> = ({
 
       {showValue && (
         <span className="text-[0.78rem] font-medium text-gold ml-1">
-          {displayRating > 0 ? displayRating.toFixed(1) : "—"}
+          {displayRating > 0
+            ? showOutOfTen
+              ? `${displayRating.toFixed(1)}★ (${Math.round(displayRating * 2)}/10)`
+              : scale === 10 && hoverRating === null
+              ? `${rating.toFixed(1)}`
+              : `${displayRating.toFixed(1)}★`
+            : "—"}
         </span>
       )}
     </div>

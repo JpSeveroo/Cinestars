@@ -68,7 +68,9 @@ async def get_user_profile(
 
 
 @users_router.patch("/me", response_model=UserResponse)
+@users_router.put("/me", response_model=UserResponse)
 @auth_router.patch("/me", response_model=UserResponse)
+@auth_router.put("/me", response_model=UserResponse)
 async def update_users_me(
     payload: UserUpdate,
     current_user: User = Depends(get_current_user),

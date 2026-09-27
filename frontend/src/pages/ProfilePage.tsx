@@ -203,7 +203,12 @@ export const ProfilePage: React.FC = () => {
             <span className="font-serif text-2xl sm:text-3xl font-semibold text-gold block leading-tight">
               {stats.average_user_rating ? `${stats.average_user_rating.toFixed(1)}★` : "—"}
             </span>
-            <span className="text-xs text-muted flex items-center justify-center gap-1.5 font-medium">
+            {stats.average_user_rating && (
+              <span className="text-[0.7rem] text-muted font-medium block">
+                equiv. {Math.round(stats.average_user_rating * 2)} / 10
+              </span>
+            )}
+            <span className="text-xs text-muted flex items-center justify-center gap-1.5 font-medium pt-0.5">
               <Star className="w-3.5 h-3.5 text-gold fill-gold" />
               <span>Média Pessoal</span>
             </span>
@@ -324,7 +329,7 @@ export const ProfilePage: React.FC = () => {
                 </div>
 
                 <div className="flex sm:flex-col items-center sm:items-end justify-between gap-1 flex-shrink-0">
-                  <StarRating rating={rev.rating} scale={5} size="sm" showValue />
+                  <StarRating rating={rev.rating} scale={5} size="sm" showValue showOutOfTen />
                   <span className="text-[0.72rem] text-muted">
                     {new Date(rev.created_at).toLocaleDateString("pt-BR", {
                       day: "2-digit",

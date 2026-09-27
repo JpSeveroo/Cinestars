@@ -1,5 +1,5 @@
 from datetime import datetime
-from pydantic import BaseModel, ConfigDict, EmailStr, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 
 
 # ==========================================
@@ -22,6 +22,16 @@ class UserLogin(BaseModel):
 class UserUpdate(BaseModel):
     bio: str | None = Field(default=None, max_length=500)
     avatar_url: str | None = Field(default=None, max_length=500)
+
+    @field_validator("bio", "avatar_url", mode="before")
+    @classmethod
+    def sanitize_empty_strings(cls, v: str | None) -> str | None:
+        if v is None:
+            return None
+        if isinstance(v, str):
+            trimmed = v.strip()
+            return trimmed if trimmed else None
+        return v
 
 
 class UserResponse(BaseModel):

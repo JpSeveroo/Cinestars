@@ -245,24 +245,24 @@ export const MovieDetailPage: React.FC = () => {
             </div>
           )}
 
-          {/* Placar de Avaliação da Comunidade */}
+          {/* Placar de Avaliação da Comunidade (Escala 10 e 5 Estrelas) */}
           <div className="flex items-center gap-3 p-3.5 rounded-[8px] bg-bg2 border border-line w-fit">
             <div className="text-center pr-3 border-r border-line">
               <span className="font-serif text-2xl font-semibold text-gold block leading-none">
-                {movie.nota_media ? (movie.nota_media / 2).toFixed(1) : "—"}
+                {movie.nota_media ? movie.nota_media.toFixed(1) : "—"}
               </span>
-              <span className="text-[0.7rem] text-muted block mt-1">escala 5★</span>
+              <span className="text-[0.7rem] text-muted block mt-1">de 10</span>
             </div>
 
             <div className="space-y-1">
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-2">
                 <StarRating
                   rating={movie.nota_media || 0}
                   scale={10}
                   size="md"
                 />
                 <span className="text-xs font-medium text-text">
-                  {movie.nota_media ? `${movie.nota_media.toFixed(1)} / 10` : "Sem notas"}
+                  {movie.nota_media ? `${(movie.nota_media / 2).toFixed(1)} / 5★` : "Sem notas"}
                 </span>
               </div>
               <p className="text-[0.72rem] text-muted">
@@ -374,7 +374,7 @@ export const MovieDetailPage: React.FC = () => {
                     </div>
 
                     <div className="flex items-center gap-2">
-                      <StarRating rating={review.rating} scale={5} size="sm" showValue />
+                      <StarRating rating={review.rating} scale={5} size="sm" showValue showOutOfTen />
                       {isSpoiled && (
                         <Badge variant="spoiler" size="sm">
                           Spoiler

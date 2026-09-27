@@ -227,7 +227,7 @@ export const HomePage: React.FC = () => {
 
                     {/* Nota */}
                     <div className="flex items-center gap-2 self-start sm:self-center">
-                      <StarRating rating={item.rating} scale={5} size="sm" showValue />
+                      <StarRating rating={item.rating} scale={5} size="sm" showValue showOutOfTen />
                     </div>
                   </div>
 

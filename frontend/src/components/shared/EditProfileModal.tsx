@@ -75,13 +75,25 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
       // 2. Invalida as queries de perfil para recarregar os dados imediatamente
       queryClient.invalidateQueries({ queryKey: queryKeys.users.profile(nickname) });
       queryClient.invalidateQueries({ queryKey: ["auth", "me"] });
+      queryClient.invalidateQueries({ queryKey: ["users"] });
 
       // 3. Notificação e fechamento
       toast.success("Perfil atualizado com sucesso!");
       onClose();
     },
-    onError: () => {
-      toast.error("Erro ao atualizar perfil. Verifique os dados e tente novamente.");
+    onError: (error: any) => {
+      let message = "Erro ao atualizar perfil. Verifique os dados e tente novamente.";
+      if (error?.response?.data?.detail) {
+        const detail = error.response.data.detail;
+        if (typeof detail === "string") {
+          message = detail;
+        } else if (Array.isArray(detail)) {
+          message = detail.map((d: any) => d.msg || d.message).join(", ");
+        }
+      } else if (error?.message) {
+        message = error.message;
+      }
+      toast.error(message);
     },
   });
 
@@ -89,14 +101,22 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (bio.length > 500) {
+    const sanitizedBio = bio.trim();
+    const sanitizedAvatar = avatarUrl.trim();
+
+    if (sanitizedBio.length > 500) {
       toast.error("A biografia não pode ultrapassar 500 caracteres.");
       return;
     }
 
+    if (sanitizedAvatar.length > 500) {
+      toast.error("A URL da foto de perfil não pode ultrapassar 500 caracteres.");
+      return;
+    }
+
     updateMutation.mutate({
-      bio: bio.trim() || null,
-      avatar_url: avatarUrl.trim() || null,
+      bio: sanitizedBio ? sanitizedBio : null,
+      avatar_url: sanitizedAvatar ? sanitizedAvatar : null,
     });
   };
 

@@ -10,10 +10,10 @@ class AuthService:
         self.repository = repository
 
     async def update_profile(self, user: User, user_update: UserUpdate) -> User:
+        update_fields = user_update.model_dump(exclude_unset=True)
         return await self.repository.update(
             user,
-            bio=user_update.bio,
-            avatar_url=user_update.avatar_url,
+            update_fields=update_fields,
         )
 
     async def register(self, user_in: UserCreate) -> User:
