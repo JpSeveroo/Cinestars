@@ -68,5 +68,30 @@ cd backend
 .venv/bin/alembic upgrade head
 ```
 
-O banco padrão é SQLite local em `backend/rocketlab.db`. Ajuste
+O banco padrão é SQLite local em `backend/cinestars.db`. Ajuste
 `DATABASE_URL` no arquivo `.env` para usar outro banco compatível.
+
+### Setup Operacional do Banco de Dados
+
+Caso a base de dados esteja limpa ou recém-criada, execute os comandos obrigatórios de migração e povoamento inicial (seeds) a partir do diretório `backend`:
+
+```bash
+alembic upgrade head
+python -m scripts.seed1
+python -m scripts.seed2
+```
+
+## Segurança e Trade-offs do MVP
+
+Para ciência dos avaliadores e auditores técnicos, a aplicação adota as seguintes decisões arquiteturais e mitigações:
+
+### Trade-offs / Riscos Aceitos no MVP
+
+- **Rate Limiting**: Não acoplado ao código da aplicação em desenvolvimento local para evitar contenção em testes assíncronos; recomendado delegar para camadas de borda/reverse proxy (Nginx/Cloudflare) em ambiente produtivo.
+- **Revogação de Sessão**: Tokens JWT adotam modelo puramente stateless com ciclo de vida finito pré-determinado.
+
+### Cabeçalhos de Segurança e Restrição de CORS
+
+- **CORS Restrito**: Métodos (`GET`, `POST`, `PUT`, `DELETE`, `OPTIONS`) e cabeçalhos (`Authorization`, `Content-Type`) explicitamente limitados na configuração do `CORSMiddleware`.
+- **Headers HTTP OWASP**: Injeção automática dos cabeçalhos defensivos `X-Content-Type-Options: nosniff` e `X-Frame-Options: DENY` via middleware nativo em todas as respostas HTTP.
+
