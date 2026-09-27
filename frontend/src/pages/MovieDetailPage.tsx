@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
@@ -14,6 +14,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Trash2,
+  Edit3,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/Button";
@@ -21,6 +22,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { StarRating } from "@/components/shared/StarRating";
 import { TrackingActions } from "@/components/shared/TrackingActions";
+import { MovieFormModal } from "@/components/shared/MovieFormModal";
 import { api } from "@/lib/api";
 import { queryKeys } from "@/lib/queryKeys";
 import { useAuthStore } from "@/store/authStore";
@@ -30,10 +32,37 @@ import type { MovieReviewListResponse, ReviewItem } from "@/types/review";
 export const MovieDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const movieId = id || "";
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { user: currentUser } = useAuthStore();
+  const { user: currentUser, isAuthenticated } = useAuthStore();
   const [reviewsPage, setReviewsPage] = useState(1);
   const [revealedSpoilers, setRevealedSpoilers] = useState<Record<string, boolean>>({});
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+  // Mutação para excluir filme do catálogo
+  const deleteMovieMutation = useMutation({
+    mutationFn: async () => {
+      await api.delete(`/movies/${movieId}`);
+    },
+    onSuccess: () => {
+      toast.success("Filme excluído do catálogo com sucesso!");
+      queryClient.invalidateQueries({ queryKey: ["movies"] });
+      navigate("/movies");
+    },
+    onError: (err: any) => {
+      toast.error(err?.response?.data?.detail || "Erro ao excluir filme do acervo.");
+    },
+  });
+
+  const handleDeleteMovie = () => {
+    if (
+      window.confirm(
+        `Tem certeza que deseja excluir o filme "${movie?.titulo || "selecionado"}" do catálogo? Esta ação é irreversível.`
+      )
+    ) {
+      deleteMovieMutation.mutate();
+    }
+  };
 
   // 1. Consulta dos detalhes do filme
   const {
@@ -155,8 +184,8 @@ export const MovieDetailPage: React.FC = () => {
 
   return (
     <div className="space-y-10">
-      {/* Botão Voltar */}
-      <div>
+      {/* Barra Superior de Navegação e Ações */}
+      <div className="flex items-center justify-between gap-4">
         <Link
           to="/movies"
           className="inline-flex items-center gap-1.5 text-xs font-medium text-muted hover:text-text transition-colors"
@@ -164,6 +193,33 @@ export const MovieDetailPage: React.FC = () => {
           <ArrowLeft className="w-3.5 h-3.5" />
           <span>Voltar ao Catálogo</span>
         </Link>
+
+        {isAuthenticated && (
+          <div className="flex items-center gap-2">
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => setIsEditModalOpen(true)}
+              className="gap-1.5 text-xs"
+              id="btn-edit-movie"
+            >
+              <Edit3 className="w-3.5 h-3.5 text-gold" />
+              <span>Editar Filme</span>
+            </Button>
+            <Button
+              variant="danger"
+              size="sm"
+              onClick={handleDeleteMovie}
+              disabled={deleteMovieMutation.isPending}
+              isLoading={deleteMovieMutation.isPending}
+              className="gap-1.5 text-xs"
+              id="btn-delete-movie"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              <span>Excluir Filme</span>
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* Backdrop Opcional */}
@@ -476,6 +532,25 @@ export const MovieDetailPage: React.FC = () => {
           </div>
         )}
       </section>
+
+      {/* Modal de Edição de Filme */}
+      {isAuthenticated && movie && (
+        <MovieFormModal
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+          mode="edit"
+          movieId={movie.sk_movie_id}
+          initialData={{
+            titulo: movie.titulo,
+            diretor: movie.diretor || directors[0]?.nome_pessoa || null,
+            ano_lancamento: movie.ano_lancamento,
+            duracao_minutos: movie.duracao_minutos,
+            generos: movie.generos,
+            sinopse: movie.sinopse,
+            url_poster: movie.url_poster,
+          }}
+        />
+      )}
     </div>
   );
 };

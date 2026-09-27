@@ -24,6 +24,9 @@ class MovieBase(BaseModel):
     sinopse: str | None = Field(None, max_length=4000)
     url_poster: str | None = Field(None, max_length=2048)
     url_backdrop: str | None = Field(None, max_length=2048)
+    diretor: str | None = Field(None, max_length=255)
+    generos: list[str] | None = None
+    genero: str | None = None
 
 
 class MovieCreate(MovieBase):
@@ -40,6 +43,9 @@ class MovieUpdate(BaseModel):
     url_poster: str | None = Field(None, max_length=2048)
     url_backdrop: str | None = Field(None, max_length=2048)
     status_filme: str | None = None
+    diretor: str | None = Field(None, max_length=255)
+    generos: list[str] | None = None
+    genero: str | None = None
 
 
 class MovieSummaryResponse(BaseModel):
@@ -72,6 +78,17 @@ class MovieDetailResponse(BaseModel):
     qtd_avaliacoes: int = 0
     genres: list[GenreResponse] = []
     people: list[PersonResponse] = []
+
+    @computed_field
+    def diretor(self) -> str | None:
+        for p in self.people:
+            if p.tipo_pessoa.lower() in ("diretor", "director"):
+                return p.nome_pessoa
+        return None
+
+    @computed_field
+    def generos(self) -> list[str]:
+        return [g.nome_genero for g in self.genres]
 
 
 class PaginatedMoviesResponse(BaseModel):

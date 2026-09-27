@@ -29,6 +29,18 @@ export interface MovieDetail extends MovieCardItem {
   url_backdrop?: string | null;
   people?: Person[];
   generos?: string[];
+  diretor?: string | null;
+}
+
+export interface MoviePayload {
+  titulo: string;
+  diretor?: string | null;
+  ano_lancamento?: number | null;
+  duracao_minutos?: number | null;
+  generos?: string[] | null;
+  sinopse?: string | null;
+  url_poster?: string | null;
+  url_backdrop?: string | null;
 }
 
 export interface MovieFilterParams {

@@ -1,10 +1,14 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, status
 
 from app.movies.schemas import (
+    MovieCreate,
     MovieDetailResponse,
+    MovieUpdate,
     PaginatedMoviesResponse,
 )
 from app.movies.service import MovieService, get_movie_service
+from app.users.dependencies import get_current_user
+from app.users.models import User
 
 router = APIRouter(prefix="/movies", tags=["movies"])
 
@@ -31,6 +35,16 @@ async def list_movies(
     )
 
 
+@router.post("", response_model=MovieDetailResponse, status_code=status.HTTP_201_CREATED)
+async def create_movie(
+    payload: MovieCreate,
+    current_user: User = Depends(get_current_user),
+    service: MovieService = Depends(get_movie_service),
+) -> MovieDetailResponse:
+    """Cadastra um novo filme no catálogo."""
+    return await service.create_movie(payload)
+
+
 @router.get(
     "/{movie_id}",
     response_model=MovieDetailResponse,
@@ -40,3 +54,24 @@ async def get_movie(
     service: MovieService = Depends(get_movie_service),
 ) -> MovieDetailResponse:
     return await service.get_movie_by_id(movie_id)
+
+
+@router.put("/{movie_id}", response_model=MovieDetailResponse)
+async def update_movie(
+    movie_id: str,
+    payload: MovieUpdate,
+    current_user: User = Depends(get_current_user),
+    service: MovieService = Depends(get_movie_service),
+) -> MovieDetailResponse:
+    """Atualiza metadados de um filme existente."""
+    return await service.update_movie(movie_id, payload)
+
+
+@router.delete("/{movie_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_movie(
+    movie_id: str,
+    current_user: User = Depends(get_current_user),
+    service: MovieService = Depends(get_movie_service),
+) -> None:
+    """Remove um filme do catálogo."""
+    await service.delete_movie(movie_id)

@@ -1,19 +1,25 @@
 import React, { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Film, Search, X, ChevronLeft, ChevronRight, AlertCircle, RefreshCw } from "lucide-react";
+import { Film, Search, X, ChevronLeft, ChevronRight, AlertCircle, RefreshCw, Plus } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { MovieCard } from "@/components/shared/MovieCard";
 import { GenreSelect } from "@/components/shared/GenreSelect";
+import { MovieFormModal } from "@/components/shared/MovieFormModal";
 import { useDebounce } from "@/hooks/useDebounce";
+import { useAuthStore } from "@/store/authStore";
 import { api } from "@/lib/api";
 import { queryKeys } from "@/lib/queryKeys";
 import type { PaginatedResponse } from "@/types/common";
 import type { MovieCardItem } from "@/types/movie";
 
 export const CatalogPage: React.FC = () => {
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAuthStore();
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedGenre, setSelectedGenre] = useState("");
   const [page, setPage] = useState(1);
@@ -117,6 +123,19 @@ export const CatalogPage: React.FC = () => {
               value={selectedGenre}
               onChange={(val) => setSelectedGenre(val)}
             />
+
+            {isAuthenticated && (
+              <Button
+                variant="primary"
+                size="md"
+                onClick={() => setIsCreateModalOpen(true)}
+                className="whitespace-nowrap shrink-0 gap-1.5"
+                id="btn-create-movie"
+              >
+                <Plus className="w-4 h-4" />
+                <span>+ Cadastrar Filme</span>
+              </Button>
+            )}
           </div>
 
           {/* Indicador de Quantidade e Loading Sutil */}
@@ -234,6 +253,18 @@ export const CatalogPage: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Modal de Cadastro de Filme */}
+      <MovieFormModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        mode="create"
+        onSuccessCallback={(newMovie) => {
+          if (newMovie?.sk_movie_id) {
+            navigate(`/movies/${newMovie.sk_movie_id}`);
+          }
+        }}
+      />
     </div>
   );
 };
