@@ -19,12 +19,14 @@ class MovieService:
         page: int = 1,
         page_size: int = 20,
         search: str | None = None,
+        genre: str | None = None,
     ) -> tuple[Sequence[DimMovie], int]:
         skip = (page - 1) * page_size
         return await self.movie_repo.get_paginated(
             skip=skip,
             limit=page_size,
             search=search,
+            genre=genre,
         )
 
     async def get_movie_by_id(self, movie_id: str) -> DimMovie:

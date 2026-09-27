@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -11,11 +11,13 @@ import {
   Home,
   Plus,
   ArrowRight,
+  Pencil,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/Button";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { StarRating } from "@/components/shared/StarRating";
+import { EditProfileModal } from "@/components/shared/EditProfileModal";
 import { api } from "@/lib/api";
 import { queryKeys } from "@/lib/queryKeys";
 import { useAuthStore } from "@/store/authStore";
@@ -26,6 +28,7 @@ export const ProfilePage: React.FC = () => {
   const { nickname } = useParams<{ nickname: string }>();
   const userNick = nickname || "";
   const { user: currentUser } = useAuthStore();
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   const isOwnProfile = currentUser?.nickname?.toLowerCase() === userNick.toLowerCase();
 
@@ -131,12 +134,23 @@ export const ProfilePage: React.FC = () => {
             </div>
 
             {isOwnProfile && (
-              <Link to="/library">
-                <Button variant="ghost" size="sm">
-                  <span>Minha Estante</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
+              <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={() => setIsEditModalOpen(true)}
+                  className="gap-1.5"
+                >
+                  <Pencil className="w-3.5 h-3.5" />
+                  <span>Editar Perfil</span>
                 </Button>
-              </Link>
+                <Link to="/library">
+                  <Button variant="ghost" size="sm">
+                    <span>Minha Estante</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </Button>
+                </Link>
+              </div>
             )}
           </div>
 
@@ -329,6 +343,17 @@ export const ProfilePage: React.FC = () => {
           </div>
         )}
       </section>
+
+      {/* Modal de Edição de Perfil */}
+      {isOwnProfile && (
+        <EditProfileModal
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+          nickname={profile.nickname}
+          initialBio={profile.bio}
+          initialAvatarUrl={profile.avatar_url}
+        />
+      )}
     </div>
   );
 };

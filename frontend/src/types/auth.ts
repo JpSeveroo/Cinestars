@@ -8,6 +8,8 @@ export interface User {
   created_at: string;
 }
 
+export type UserResponse = User;
+
 export interface LoginPayload {
   identifier?: string;
   login?: string;

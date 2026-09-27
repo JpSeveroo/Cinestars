@@ -3,11 +3,18 @@ from app.core.security import create_access_token, get_password_hash, verify_pas
 from app.users.exceptions import InvalidCredentialsError, UserAlreadyExistsError, UserNotFoundError
 from app.users.models import User
 from app.users.repository import UserRepository
-from app.users.schemas import TokenResponse, UserCreate, UserLogin
+from app.users.schemas import TokenResponse, UserCreate, UserLogin, UserUpdate
 
 class AuthService:
     def __init__(self, repository: UserRepository):
         self.repository = repository
+
+    async def update_profile(self, user: User, user_update: UserUpdate) -> User:
+        return await self.repository.update(
+            user,
+            bio=user_update.bio,
+            avatar_url=user_update.avatar_url,
+        )
 
     async def register(self, user_in: UserCreate) -> User:
         if await self.repository.get_by_email(user_in.email):

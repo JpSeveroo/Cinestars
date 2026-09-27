@@ -6,29 +6,16 @@ import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { MovieCard } from "@/components/shared/MovieCard";
+import { GenreSelect } from "@/components/shared/GenreSelect";
 import { useDebounce } from "@/hooks/useDebounce";
 import { api } from "@/lib/api";
 import { queryKeys } from "@/lib/queryKeys";
 import type { PaginatedResponse } from "@/types/common";
 import type { MovieCardItem } from "@/types/movie";
 
-const GENRES = [
-  "Todos",
-  "Ação",
-  "Aventura",
-  "Animação",
-  "Comédia",
-  "Crime",
-  "Drama",
-  "Ficção Científica",
-  "Terror",
-  "Romance",
-  "Thriller",
-];
-
 export const CatalogPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedGenre, setSelectedGenre] = useState("Todos");
+  const [selectedGenre, setSelectedGenre] = useState("");
   const [page, setPage] = useState(1);
   const pageSize = 18;
 
@@ -53,7 +40,7 @@ export const CatalogPage: React.FC = () => {
       page,
       page_size: pageSize,
       search: debouncedSearch || undefined,
-      genre: selectedGenre !== "Todos" ? selectedGenre : undefined,
+      genre: selectedGenre || undefined,
     }),
     queryFn: async () => {
       const response = await api.get<PaginatedResponse<MovieCardItem>>("/movies", {
@@ -61,6 +48,7 @@ export const CatalogPage: React.FC = () => {
           page,
           page_size: pageSize,
           search: debouncedSearch || undefined,
+          genre: selectedGenre || undefined,
         },
       });
       return response.data;
@@ -81,7 +69,7 @@ export const CatalogPage: React.FC = () => {
 
   const handleClearSearch = () => {
     setSearchTerm("");
-    setSelectedGenre("Todos");
+    setSelectedGenre("");
     setPage(1);
   };
 
@@ -98,34 +86,41 @@ export const CatalogPage: React.FC = () => {
         </p>
       </header>
 
-      {/* Controles: Busca e Filtros Rápidos */}
+      {/* Controles: Busca e Filtro com Dropdown Customizado */}
       <div className="space-y-4">
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
-          {/* Input de Busca com Debounce */}
-          <div className="w-full sm:max-w-md">
-            <Input
-              id="movie-search"
-              placeholder="Buscar filme por título..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              leftIcon={<Search className="w-4 h-4 text-muted" />}
-              rightIcon={
-                searchTerm ? (
-                  <button
-                    type="button"
-                    onClick={() => setSearchTerm("")}
-                    className="text-muted hover:text-text p-1 transition-colors"
-                    aria-label="Limpar campo de pesquisa"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                ) : null
-              }
+        <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+          {/* Barra de Pesquisa e Dropdown de Gênero */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:max-w-2xl">
+            <div className="flex-1">
+              <Input
+                id="movie-search"
+                placeholder="Buscar filme por título..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                leftIcon={<Search className="w-4 h-4 text-muted" />}
+                rightIcon={
+                  searchTerm ? (
+                     <button
+                      type="button"
+                      onClick={() => setSearchTerm("")}
+                      className="text-muted hover:text-text p-1 transition-colors"
+                      aria-label="Limpar campo de pesquisa"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  ) : null
+                }
+              />
+            </div>
+
+            <GenreSelect
+              value={selectedGenre}
+              onChange={(val) => setSelectedGenre(val)}
             />
           </div>
 
           {/* Indicador de Quantidade e Loading Sutil */}
-          <div className="flex items-center gap-2 text-xs text-muted self-end sm:self-center">
+          <div className="flex items-center gap-2 text-xs text-muted self-end md:self-center">
             {isFetching && (
               <span className="inline-flex items-center gap-1.5 text-gold animate-pulse">
                 <RefreshCw className="w-3 h-3 animate-spin" />
@@ -139,27 +134,6 @@ export const CatalogPage: React.FC = () => {
               </span>
             )}
           </div>
-        </div>
-
-        {/* Pílulas de Gênero */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
-          {GENRES.map((genre) => {
-            const isSelected = selectedGenre === genre;
-            return (
-              <button
-                key={genre}
-                type="button"
-                onClick={() => setSelectedGenre(genre)}
-                className={`px-3 py-1 rounded-pill text-xs font-medium whitespace-nowrap transition-colors border select-none ${
-                  isSelected
-                    ? "bg-gold/10 border-gold text-gold font-semibold"
-                    : "bg-card border-line text-muted hover:text-text hover:border-line/80"
-                }`}
-              >
-                {genre}
-              </button>
-            );
-          })}
         </div>
       </div>
 

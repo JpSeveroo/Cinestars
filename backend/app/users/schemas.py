@@ -19,6 +19,11 @@ class UserLogin(BaseModel):
     password: str
 
 
+class UserUpdate(BaseModel):
+    bio: str | None = Field(default=None, max_length=500)
+    avatar_url: str | None = Field(default=None, max_length=500)
+
+
 class UserResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 

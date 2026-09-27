@@ -4,7 +4,7 @@ from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.movies.models import DimMovie
+from app.movies.models import DimGenre, DimMovie
 from app.movies.schemas import MovieCreate, MovieUpdate
 
 
@@ -17,6 +17,7 @@ class MovieRepository:
         skip: int = 0,
         limit: int = 20,
         search: str | None = None,
+        genre: str | None = None,
     ) -> tuple[Sequence[DimMovie], int]:
         """Retorna filmes com carregamento antecipado de gêneros e resumo de notas."""
         count_stmt = select(func.count(DimMovie.sk_movie_id))
@@ -39,6 +40,11 @@ class MovieRepository:
             search_filter = DimMovie.titulo.ilike(f"%{escaped_search}%", escape="\\")
             count_stmt = count_stmt.where(search_filter)
             stmt = stmt.where(search_filter)
+
+        if genre:
+            genre_filter = DimMovie.genres.any(func.lower(DimGenre.nome_genero) == genre.strip().lower())
+            count_stmt = count_stmt.where(genre_filter)
+            stmt = stmt.where(genre_filter)
 
         total_result = await self.db.execute(count_stmt)
         total = total_result.scalar_one()

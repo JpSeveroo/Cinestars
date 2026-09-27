@@ -48,6 +48,14 @@ class UserRepository:
         await self.db.flush()
         return user
 
+    async def update(self, user: User, bio: str | None = None, avatar_url: str | None = None) -> User:
+        if bio is not None:
+            user.bio = bio
+        if avatar_url is not None:
+            user.avatar_url = avatar_url
+        await self.db.flush()
+        return user
+
     # --- Métodos de Leitura do Perfil Público (Letterboxd Style) ---
 
     async def get_user_stats(self, user_id: str) -> dict[str, Any]:

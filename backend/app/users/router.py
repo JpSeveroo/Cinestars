@@ -16,6 +16,7 @@ from app.users.schemas import (
     UserLogin,
     UserProfileResponse,
     UserResponse,
+    UserUpdate,
 )
 from app.users.service import AuthService
 
@@ -64,3 +65,13 @@ async def get_user_profile(
         return await service.get_public_profile(nickname)
     except UserNotFoundError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+
+
+@users_router.patch("/me", response_model=UserResponse)
+@auth_router.patch("/me", response_model=UserResponse)
+async def update_users_me(
+    payload: UserUpdate,
+    current_user: User = Depends(get_current_user),
+    service: AuthService = Depends(get_auth_service),
+) -> User:
+    return await service.update_profile(current_user, payload)
