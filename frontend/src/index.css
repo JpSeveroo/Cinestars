@@ -1,0 +1,66 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #12141c;
+  --bg2: #191c27;
+  --card: #1f2330;
+  --line: #2c3040;
+  --gold: #e8b44c;
+  --teal: #4fb3a2;
+  --text: #f1eee6;
+  --text-body: #cfcdc6;
+  --muted: #9a9fb0;
+  --danger: #d9765a;
+}
+
+@layer base {
+  * {
+    border-color: var(--line);
+  }
+
+  body {
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, .font-serif {
+    font-family: 'Fraunces', serif;
+  }
+
+  /* Custom scrollbar para tema cinematográfico escuro */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--bg);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--line);
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #3b4156;
+  }
+}
+
+/* Transição de visualização: fade + slide-up sutil (0.25s ease) */
+@keyframes pageFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-transition {
+  animation: pageFadeIn 0.25s ease-out forwards;
+}
