@@ -305,9 +305,15 @@ Abra um **segundo terminal** dedicado para o frontend:
 cd frontend
 
 # 2. Instale as dependências do ecossistema Node
+# OBS: Certifique-se de ter o Node.js e o npm instalados na sua máquina:
+# - Windows: Baixe em https://nodejs.org ou via CMD/PowerShell: winget install OpenJS.NodeJS.LTS
+# - macOS: Baixe em https://nodejs.org ou via Homebrew: brew install node
+# - Linux: sudo dnf install nodejs npm (Fedora) ou sudo apt install nodejs npm (Debian/Ubuntu)
+# Para validar a instalação: node -v && npm -v
 npm install
 
 # 3. Configure o arquivo de variáveis de ambiente
+# (No Windows CMD use: copy .env.example .env)
 cp .env.example .env
 
 # 4. Inicie o servidor de desenvolvimento do Vite
